@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ artifact.name }} - Details</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header { 
+            text-align: center; 
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white; 
+            padding: 20px; 
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .artifact-info { 
+            margin: 20px 0; 
+        }
+        .info-item { 
+            margin: 10px 0; 
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #8B4513;
+        }
+        .status-contested { 
+            color: #d9534f; 
+            font-weight: bold; 
+            background: #f8d7da;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .status-returned { 
+            color: #5cb85c; 
+            font-weight: bold; 
+            background: #d4edda;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .nav-links { 
+            text-align: center; 
+            margin: 20px 0; 
+        }
+        .nav-links a {
+            background: #8B4513;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            display: inline-block;
+        }
+        .nav-links a:hover {
+            background: #A0522D;
+        }
+        .coordinates {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏺 {{ artifact.name }}</h1>
+            <p>Detailed Information</p>
+        </div>
+
+        <div class="nav-links">
+            <a href="/map">🗺️ Back to Map</a>
+            <a href="/artifacts">📋 All Artifacts</a>
+            <a href="/">🏠 Home</a>
+        </div>
+
+        <div class="artifact-info">
+            <div class="info-item">
+                <strong>🏛️ Current Museum:</strong> {{ artifact.museum }}
+            </div>
+            <div class="info-item">
+                <strong>📍 Location:</strong> {{ artifact.city }}, {{ artifact.country }}
+            </div>
+            <div class="info-item">
+                <strong>🌐 Coordinates:</strong> 
+                <span class="coordinates">{{ artifact.latitude }}, {{ artifact.longitude }}</span>
+            </div>
+            <div class="info-item">
+                <strong>📊 Status:</strong> 
+                <span class="status-{{ artifact.status.lower() }}">{{ artifact.status }}</span>
+            </div>
+            <div class="info-item">
+                <strong>📅 Year Taken:</strong> {{ artifact.year_taken }}
+            </div>
+            <div class="info-item">
+                <strong>🔍 Artifact Type:</strong> {{ artifact.artifact_type }}
+            </div>
+            <div class="info-item">
+                <strong>📝 Description:</strong><br>
+                {{ artifact.description }}
+            </div>
+            {% if artifact.current_location %}
+            <div class="info-item">
+                <strong>🏺 Current Location:</strong> {{ artifact.current_location }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="nav-links">
+            <a href="/map">🗺️ View on Map</a>
+            <a href="/artifacts">📋 Back to List</a>
+        </div>
+    </div>
+</body>
+</html>

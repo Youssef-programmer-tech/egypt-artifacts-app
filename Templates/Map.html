@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egyptian Artifacts World Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .stats-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-bar span {
+            margin: 0 15px;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            background: #8B4513;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .nav-links a:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        #map {
+            height: 700px;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 3px solid #8B4513;
+        }
+        
+        .info-window {
+            max-width: 350px;
+            font-family: Arial, sans-serif;
+            padding: 10px;
+        }
+        
+        .info-window h3 {
+            color: #8B4513;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8B4513;
+            font-size: 1.3em;
+        }
+        
+        .info-window p {
+            margin: 8px 0;
+            font-size: 0.95em;
+        }
+        
+        .info-window strong {
+            color: #5a3921;
+        }
+        
+        .status-contested {
+            color: #d9534f;
+            font-weight: bold;
+            background: #f8d7da;
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        
+        .status-returned {
+            color: #5cb85c;
+            font-weight: bold;
+            background: #d4edda;
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        
+        .status-in-egypt {
+            color: #0275d8;
+            font-weight: bold;
+            background: #d9edf7;
+            padding: 4px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        
+        .detail-link {
+            display: block;
+            text-align: center;
+            background: #8B4513;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        
+        .detail-link:hover {
+            background: #A0522D;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+        }
+        
+        .legend h4 {
+            margin: 0 0 12px 0;
+            color: #8B4513;
+            font-size: 1.1em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-right: 10px;
+            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #8B4513;
+        }
+        
+        .map-controls {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            border: 2px solid #8B4513;
+            background: white;
+            color: #8B4513;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .filter-btn.active {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .filter-btn:hover {
+            background: #A0522D;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            #map {
+                height: 500px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Egyptian Artifacts World Map</h1>
+            <p>Explore {{ artifacts|length }} artifacts across {{ countries|length }} countries worldwide</p>
+        </div>
+
+        <div class="stats-bar">
+            <span>🏺 {{ artifacts|length }} Total Artifacts</span>
+            <span>⚖️ {{ contested_count }} Contested</span>
+            <span>✅ {{ returned_count }} Returned</span>
+            <span>🏠 {{ in_egypt_count }} In Egypt</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/artifacts">📋 All {{ artifacts|length }} Artifacts</a>
+            <a href="/statistics">📊 Statistics</a>
+        </div>
+
+        <div class="map-controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterMarkers('all')">All ({{ artifacts|length }})</button>
+                <button class="filter-btn" onclick="filterMarkers('Contested')">Contested ({{ contested_count }})</button>
+                <button class="filter-btn" onclick="filterMarkers('Returned')">Returned ({{ returned_count }})</button>
+                <button class="filter-btn" onclick="filterMarkers('In Egypt')">In Egypt ({{ in_egypt_count }})</button>
+            </div>
+        </div>
+
+        <div id="map">
+            <div class="loading">Loading world map with {{ artifacts|length }} artifacts...</div>
+        </div>
+
+        <div class="footer">
+            <p>Egyptian Artifacts Tracker &copy; 2024 | Interactive World Map</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Wait for the page to load completely
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing map...');
+            
+            // Remove loading message
+            const loadingElement = document.querySelector('.loading');
+            if (loadingElement) {
+                loadingElement.remove();
+            }
+
+            // Initialize the map
+            const map = L.map('map').setView([30.0444, 31.2357], 2);
+            console.log('Map initialized');
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            console.log('Tile layer added');
+
+            function createCustomIcon(status) {
+                let color;
+                if (status === 'Returned') {
+                    color = '#5cb85c'; // green
+                } else if (status === 'In Egypt') {
+                    color = '#0275d8'; // blue
+                } else {
+                    color = '#d9534f'; // red
+                }
+                
+                return L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="
+                        background-color: ${color}; 
+                        width: 25px; 
+                        height: 25px; 
+                        border-radius: 50%; 
+                        border: 3px solid white;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 12px;
+                    ">🏺</div>`,
+                    iconSize: [25, 25],
+                    iconAnchor: [12, 12],
+                    popupAnchor: [0, -12]
+                });
+            }
+
+            // Get artifacts data from Flask
+            let artifacts = [];
+            
+            // Try to fetch data from API
+            fetch('/api/artifacts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch artifacts');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fetched artifacts:', data.length);
+                    artifacts = data;
+                    initializeMarkers();
+                })
+                .catch(error => {
+                    console.error('Error fetching artifacts:', error);
+                    // Fallback to inline data if API fails
+                    if (typeof window.artifactsData !== 'undefined') {
+                        artifacts = window.artifactsData;
+                        initializeMarkers();
+                    } else {
+                        alert('Failed to load artifacts. Please refresh the page.');
+                    }
+                });
+
+            const allMarkers = [];
+            const markerGroups = {
+                'all': [],
+                'Contested': [],
+                'Returned': [],
+                'In Egypt': []
+            };
+
+            function initializeMarkers() {
+                console.log('Initializing markers with', artifacts.length, 'artifacts');
+                
+                if (artifacts.length === 0) {
+                    console.error('No artifacts to display');
+                    return;
+                }
+
+                artifacts.forEach(artifact => {
+                    const marker = L.marker([artifact.latitude, artifact.longitude], {
+                        icon: createCustomIcon(artifact.status)
+                    }).addTo(map);
+
+                    const statusClass = artifact.status.toLowerCase().replace(' ', '-');
+                    const popupContent = `
+                        <div class="info-window">
+                            <h3>${artifact.name}</h3>
+                            <p><strong>🏛️ Museum:</strong> ${artifact.museum}</p>
+                            <p><strong>📍 Location:</strong> ${artifact.city}, ${artifact.country}</p>
+                            <p><strong>📅 Year Taken:</strong> ${artifact.year_taken}</p>
+                            <p><strong>🔍 Type:</strong> ${artifact.artifact_type}</p>
+                            <p><strong>📊 Status:</strong> 
+                                <span class="status-${statusClass}">${artifact.status}</span>
+                            </p>
+                            <p><strong>📝 Description:</strong> ${artifact.description.substring(0, 100)}...</p>
+                            <a href="/artifact/${artifact.id}" class="detail-link">
+                                📖 View Full Details
+                            </a>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent, {
+                        maxWidth: 350
+                    });
+
+                    allMarkers.push(marker);
+                    markerGroups['all'].push(marker);
+                    if (markerGroups[artifact.status]) {
+                        markerGroups[artifact.status].push(marker);
+                    }
+                });
+
+                console.log('Markers added:', allMarkers.length);
+
+                const legend = L.control({ position: 'bottomright' });
+                legend.onAdd = function (map) {
+                    const div = L.DomUtil.create('div', 'legend');
+                    div.innerHTML = `
+                        <h4>Map Legend</h4>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #d9534f;"></div>
+                            <span>Contested Artifacts</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #5cb85c;"></div>
+                            <span>Returned Artifacts</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #0275d8;"></div>
+                            <span>Artifacts in Egypt</span>
+                        </div>
+                    `;
+                    return div;
+                };
+                legend.addTo(map);
+
+                if (artifacts.length > 0) {
+                    const group = new L.featureGroup(allMarkers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                    console.log('Map bounds fitted to markers');
+                }
+
+                L.control.scale({ imperial: false }).addTo(map);
+                console.log('Map setup complete');
+            }
+
+            window.filterMarkers = function(status) {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+                
+                allMarkers.forEach(marker => {
+                    map.removeLayer(marker);
+                });
+                
+                if (status === 'all') {
+                    allMarkers.forEach(marker => {
+                        map.addLayer(marker);
+                    });
+                } else {
+                    const markers = markerGroups[status] || [];
+                    markers.forEach(marker => {
+                        map.addLayer(marker);
+                    });
+                }
+                
+                const visibleMarkers = status === 'all' ? allMarkers : (markerGroups[status] || []);
+                if (visibleMarkers.length > 0) {
+                    const group = new L.featureGroup(visibleMarkers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+            };
+        });
+    </script>
+</body>
+</html>

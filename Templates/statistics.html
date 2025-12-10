@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifacts Statistics & Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stats-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-bar span {
+            margin: 0 20px;
+            font-weight: bold;
+            color: #8B4513;
+            font-size: 1.1em;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            background: #8B4513;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .nav-links a:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #8B4513;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #8B4513;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 1.2em;
+            color: #666;
+        }
+        
+        .stat-description {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chart-card h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4em;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        
+        .country-list {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .country-list h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.4em;
+        }
+        
+        .country-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.3s ease;
+        }
+        
+        .country-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .country-item:last-child {
+            border-bottom: none;
+        }
+        
+        .country-name {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .country-count {
+            background: #8B4513;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        
+        .country-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .country-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8B4513, #D2691E);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .insight-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #8B4513;
+        }
+        
+        .insight-card h4 {
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stat-number {
+                font-size: 2.5em;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Artifacts Statistics & Analytics</h1>
+            <p>Comprehensive analysis of {{ total_artifacts }} Egyptian artifacts across {{ countries|length }} countries</p>
+        </div>
+
+        <div class="stats-bar">
+            <span>🏺 {{ total_artifacts }} Total Artifacts</span>
+            <span>⚖️ {{ contested_count }} Contested</span>
+            <span>✅ {{ returned_count }} Returned</span>
+            <span>🏠 {{ in_egypt_count }} In Egypt</span>
+            <span>🌍 {{ countries|length }} Countries</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/map">🗺️ Interactive Map</a>
+            <a href="/artifacts">📋 All {{ total_artifacts }} Artifacts</a>
+        </div>
+
+        <!-- Key Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_artifacts }}</div>
+                <div class="stat-label">Total Artifacts Tracked</div>
+                <div class="stat-description">Egyptian cultural heritage items documented worldwide</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ contested_count }}</div>
+                <div class="stat-label">Currently Contested</div>
+                <div class="stat-description">Actively sought for repatriation by Egypt</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ returned_count }}</div>
+                <div class="stat-label">Successfully Returned</div>
+                <div class="stat-description">Artifacts repatriated through diplomatic efforts</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ in_egypt_count }}</div>
+                <div class="stat-label">Remained in Egypt</div>
+                <div class="stat-description">Cultural heritage preserved in local museums</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ countries|length }}</div>
+                <div class="stat-label">Countries Involved</div>
+                <div class="stat-description">Nations hosting Egyptian cultural heritage</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ ((contested_count / total_artifacts) * 100)|round(1) }}%</div>
+                <div class="stat-label">Contested Percentage</div>
+                <div class="stat-description">Of total artifacts are claimed by Egypt</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-container">
+            <div class="chart-card">
+                <h3>Artifacts by Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Artifacts by Country (Top 10)</h3>
+                <div class="chart-container">
+                    <canvas id="countryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Country Distribution -->
+        <div class="country-list">
+            <h3>🌍 Global Distribution by Country</h3>
+            {% for country, count in countries.items() | sort(attribute='1', reverse=true) %}
+            {% set percentage = ((count / total_artifacts) * 100)|round(1) %}
+            <div class="country-item">
+                <span class="country-name">{{ country }}</span>
+                <div class="country-bar">
+                    <div class="country-bar-fill" style="width: {{ percentage }}%"></div>
+                </div>
+                <span class="country-count">{{ count }} ({{ percentage }}%)</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Insights -->
+        <div class="insights-grid">
+            <div class="insight-card">
+                <h4>📈 Collection Size</h4>
+                <p>The British Museum holds the largest collection with {{ countries.get('United Kingdom', 0) }} Egyptian artifacts.</p>
+            </div>
+            
+            <div class="insight-card">
+                <h4>⚖️ Restitution Progress</h4>
+                <p>{{ returned_count }} artifacts have been successfully returned to Egypt through diplomatic efforts.</p>
+            </div>
+            
+            <div class="insight-card">
+                <h4>🌐 Global Spread</h4>
+                <p>Egyptian artifacts are spread across {{ countries|length }} countries on 4 continents.</p>
+            </div>
+            
+            <div class="insight-card">
+                <h4>🏺 Cultural Significance</h4>
+                <p>These {{ total_artifacts }} artifacts represent 3,000+ years of Egyptian civilization.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Egyptian Artifacts Tracker &copy; 2024 | Statistical Analysis of {{ total_artifacts }} Artifacts</p>
+        </div>
+    </div>
+
+    <script>
+        // Wait for the page to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Status Chart Data
+            const statusData = {
+                contested: {{ contested_count }},
+                returned: {{ returned_count }},
+                inEgypt: {{ in_egypt_count }}
+            };
+
+            // Country Chart Data (Top 10)
+            const countryData = {
+                names: {{ country_names[:10] | tojson }},
+                counts: {{ country_counts[:10] }}
+            };
+
+            // Initialize Status Chart
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Contested', 'Returned', 'In Egypt'],
+                        datasets: [{
+                            data: [statusData.contested, statusData.returned, statusData.inEgypt],
+                            backgroundColor: ['#d9534f', '#5cb85c', '#0275d8'],
+                            borderColor: ['#c9302c', '#4cae4c', '#025aa5'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = {{ total_artifacts }};
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Initialize Country Chart
+            const countryCtx = document.getElementById('countryChart');
+            if (countryCtx && countryData.names.length > 0) {
+                new Chart(countryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: countryData.names,
+                        datasets: [{
+                            label: 'Number of Artifacts',
+                            data: countryData.counts,
+                            backgroundColor: '#8B4513',
+                            borderColor: '#5a3921',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Artifacts'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Countries'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw || 0;
+                                        const total = {{ total_artifacts }};
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `Artifacts: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

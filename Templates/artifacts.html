@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egyptian Artifacts Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stats-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-bar span {
+            margin: 0 15px;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            background: #8B4513;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .nav-links a:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .search-filter {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            border: 2px solid #8B4513;
+        }
+        
+        .search-box button {
+            padding: 15px 25px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .search-box button:hover {
+            background: #A0522D;
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 1em;
+            border: 2px solid #8B4513;
+            color: #8B4513;
+            font-weight: bold;
+        }
+        
+        .artifacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .artifact-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .artifact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .artifact-header {
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 20px;
+        }
+        
+        .artifact-header h3 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+        
+        .artifact-type {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+        
+        .artifact-body {
+            padding: 20px;
+        }
+        
+        .artifact-info {
+            margin-bottom: 15px;
+        }
+        
+        .artifact-info p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .artifact-info strong {
+            color: #5a3921;
+            min-width: 120px;
+            display: inline-block;
+        }
+        
+        .status-contested {
+            color: #d9534f;
+            font-weight: bold;
+            background: #f8d7da;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .status-returned {
+            color: #5cb85c;
+            font-weight: bold;
+            background: #d4edda;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .status-in-egypt {
+            color: #0275d8;
+            font-weight: bold;
+            background: #d9edf7;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .artifact-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #8B4513;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .artifact-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            font-size: 1.2em;
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .results-count {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #8B4513;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        
+        .page-btn {
+            padding: 10px 15px;
+            border: 2px solid #8B4513;
+            background: white;
+            color: #8B4513;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .page-btn.active {
+            background: #8B4513;
+            color: white;
+        }
+        
+        .page-btn:hover {
+            background: #A0522D;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .artifacts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .filter-options {
+                flex-direction: column;
+            }
+            
+            .artifact-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Egyptian Artifacts Catalog</h1>
+            <p>Complete database of {{ artifacts|length }} Egyptian artifacts in collections worldwide</p>
+        </div>
+
+        <div class="stats-bar">
+            <span>🏺 {{ artifacts|length }} Total Artifacts</span>
+            <span>⚖️ {{ (artifacts | selectattr('status', 'equalto', 'Contested') | list) | length }} Contested</span>
+            <span>✅ {{ (artifacts | selectattr('status', 'equalto', 'Returned') | list) | length }} Returned</span>
+            <span>🏠 {{ (artifacts | selectattr('status', 'equalto', 'In Egypt') | list) | length }} In Egypt</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">🏠 Home</a>
+            <a href="{{ url_for('map_page') }}">🗺️ Interactive Map</a>
+            <a href="{{ url_for('statistics') }}">📊 Statistics</a>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="search-filter">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search through {{ artifacts|length }} artifacts by name, museum, or location...">
+                <button onclick="performSearch()">Search</button>
+            </div>
+            <div class="filter-options">
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Statuses ({{ artifacts|length }})</option>
+                    <option value="Contested">Contested ({{ (artifacts | selectattr('status', 'equalto', 'Contested') | list) | length }})</option>
+                    <option value="Returned">Returned ({{ (artifacts | selectattr('status', 'equalto', 'Returned') | list) | length }})</option>
+                    <option value="In Egypt">In Egypt ({{ (artifacts | selectattr('status', 'equalto', 'In Egypt') | list) | length }})</option>
+                </select>
+                <select id="countryFilter" class="filter-select">
+                    <option value="all">All Countries ({{ (artifacts | map(attribute='country') | unique | list) | length }})</option>
+                    {% for country in countries %}
+                    <option value="{{ country }}">{{ country }} ({{ (artifacts | selectattr('country', 'equalto', country) | list) | length }})</option>
+                    {% endfor %}
+                </select>
+                <select id="typeFilter" class="filter-select">
+                    <option value="all">All Types</option>
+                    {% set types = artifacts | map(attribute='artifact_type') | unique | list %}
+                    {% for type in types %}
+                    <option value="{{ type }}">{{ type }} ({{ (artifacts | selectattr('artifact_type', 'equalto', type) | list) | length }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="results-count" id="resultsCount">
+            Showing all {{ artifacts|length }} artifacts
+        </div>
+
+        <!-- Artifacts Grid -->
+        <div class="artifacts-grid" id="artifactsGrid">
+            {% for artifact in artifacts %}
+            <div class="artifact-card" data-status="{{ artifact.status }}" data-country="{{ artifact.country }}" data-type="{{ artifact.artifact_type }}" data-name="{{ artifact.name.lower() }}">
+                <div class="artifact-header">
+                    <h3>{{ artifact.name }}</h3>
+                    <div class="artifact-type">{{ artifact.artifact_type }}</div>
+                </div>
+                
+                <div class="artifact-body">
+                    <div class="artifact-info">
+                        <p><strong>🏛️ Museum:</strong> {{ artifact.museum }}</p>
+                        <p><strong>📍 Location:</strong> {{ artifact.city }}, {{ artifact.country }}</p>
+                        <p><strong>📅 Year Taken:</strong> 
+                            {% if artifact.year_taken == 'Never Taken' %}
+                                Never Taken
+                            {% else %}
+                                {{ artifact.year_taken }}
+                            {% endif %}
+                        </p>
+                        <p><strong>📊 Status:</strong> 
+                            {% if artifact.status == 'Contested' %}
+                                <span class="status-contested">{{ artifact.status }}</span>
+                            {% elif artifact.status == 'Returned' %}
+                                <span class="status-returned">{{ artifact.status }}</span>
+                            {% elif artifact.status == 'In Egypt' %}
+                                <span class="status-in-egypt">{{ artifact.status }}</span>
+                            {% else %}
+                                <span>{{ artifact.status }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="artifact-description">
+                        {{ artifact.description[:150] }}{% if artifact.description|length > 150 %}...{% endif %}
+                    </div>
+                    
+                    <div class="artifact-actions">
+                        <a href="{{ url_for('map_page') }}#{{ artifact.id }}" class="btn btn-primary">🗺️ View on Map</a>
+                        <a href="{{ url_for('artifact_detail', artifact_id=artifact.id) }}" class="btn btn-secondary">📖 Full Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="footer">
+            <p>Egyptian Artifacts Tracker &copy; 2024 | Comprehensive Catalog of {{ artifacts|length }} Artifacts</p>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const itemsPerPage = 12;
+        let filteredArtifacts = {{ artifacts|length }};
+
+        // Search and filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const statusFilter = document.getElementById('statusFilter');
+            const countryFilter = document.getElementById('countryFilter');
+            const typeFilter = document.getElementById('typeFilter');
+            const artifactCards = document.querySelectorAll('.artifact-card');
+            
+            function filterArtifacts() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value;
+                const countryValue = countryFilter.value;
+                const typeValue = typeFilter.value;
+                
+                let visibleCount = 0;
+                
+                artifactCards.forEach(card => {
+                    const name = card.dataset.name;
+                    const status = card.dataset.status;
+                    const country = card.dataset.country;
+                    const type = card.dataset.type;
+                    
+                    // Get text content from the card
+                    const cardText = card.textContent.toLowerCase();
+                    
+                    // Check if search term matches any text in the card
+                    const matchesSearch = searchTerm === '' || 
+                                         cardText.includes(searchTerm);
+                    
+                    const matchesStatus = statusValue === 'all' || status === statusValue;
+                    const matchesCountry = countryValue === 'all' || country === countryValue;
+                    const matchesType = typeValue === 'all' || type === typeValue;
+                    
+                    if (matchesSearch && matchesStatus && matchesCountry && matchesType) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Update results count
+                document.getElementById('resultsCount').textContent = 
+                    `Showing ${visibleCount} of ${artifactCards.length} artifacts`;
+                
+                filteredArtifacts = visibleCount;
+                
+                // Show no results message if needed
+                const noResults = document.getElementById('noResults');
+                if (visibleCount === 0) {
+                    if (!noResults) {
+                        const noResultsDiv = document.createElement('div');
+                        noResultsDiv.id = 'noResults';
+                        noResultsDiv.className = 'no-results';
+                        noResultsDiv.innerHTML = `
+                            <h3>No artifacts found</h3>
+                            <p>Try adjusting your search criteria or filters</p>
+                            <button onclick="clearFilters()" style="margin-top: 15px; padding: 10px 20px; background: #8B4513; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Clear All Filters
+                            </button>
+                        `;
+                        document.getElementById('artifactsGrid').appendChild(noResultsDiv);
+                    }
+                } else if (noResults) {
+                    noResults.remove();
+                }
+            }
+            
+            searchInput.addEventListener('input', filterArtifacts);
+            statusFilter.addEventListener('change', filterArtifacts);
+            countryFilter.addEventListener('change', filterArtifacts);
+            typeFilter.addEventListener('change', filterArtifacts);
+            
+            // URL parameter handling for search
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchQuery = urlParams.get('search');
+            if (searchQuery) {
+                searchInput.value = searchQuery;
+                filterArtifacts();
+            }
+        });
+
+        function performSearch() {
+            // Trigger the filter function
+            const event = new Event('input');
+            document.getElementById('searchInput').dispatchEvent(event);
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('countryFilter').value = 'all';
+            document.getElementById('typeFilter').value = 'all';
+            
+            // Trigger the filter function to update display
+            const event = new Event('change');
+            document.getElementById('statusFilter').dispatchEvent(event);
+        }
+
+        // Enter key support for search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

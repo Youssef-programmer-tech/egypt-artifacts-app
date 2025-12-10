@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ artifact.name }} - Details</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin: 30px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            background: #8B4513;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .nav-links a:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .artifact-detail {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .detail-section {
+            margin-bottom: 25px;
+        }
+        
+        .detail-section h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #8B4513;
+            font-size: 1.3em;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #8B4513;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #5a3921;
+            min-width: 150px;
+            display: inline-block;
+        }
+        
+        .info-value {
+            flex: 1;
+        }
+        
+        .status-contested {
+            color: #d9534f;
+            font-weight: bold;
+            background: #f8d7da;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .status-returned {
+            color: #5cb85c;
+            font-weight: bold;
+            background: #d4edda;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .status-in-egypt {
+            color: #0275d8;
+            font-weight: bold;
+            background: #d9edf7;
+            padding: 6px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .description-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #8B4513;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+        
+        .coordinates {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        
+        .quick-facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .fact-card {
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .fact-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .fact-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .image-gallery {
+            margin-bottom: 25px;
+        }
+        
+        .main-image {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid #8B4513;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .thumbnail {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail:hover {
+            border-color: #8B4513;
+            transform: scale(1.05);
+        }
+        
+        .thumbnail.active {
+            border-color: #8B4513;
+            box-shadow: 0 2px 8px rgba(139, 69, 19, 0.4);
+        }
+        
+        .image-placeholder {
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            height: 400px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 3px solid #8B4513;
+        }
+        
+        .image-placeholder .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 20px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #8B4513;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #D2691E;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #8B4513;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #8B4513;
+        }
+        
+        .timeline-year {
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 5px;
+        }
+
+        .no-images {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0 0 0;
+        }
+        
+        .action-buttons a {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏺 {{ artifact.name }}</h1>
+            <p>Detailed Information and Historical Context</p>
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('map_page') }}">🗺️ Back to Map</a>
+            <a href="{{ url_for('artifacts_list') }}">📋 All Artifacts</a>
+            <a href="{{ url_for('index') }}">🏠 Home</a>
+            <a href="{{ url_for('statistics') }}">📊 Statistics</a>
+        </div>
+
+        <div class="artifact-detail">
+            <!-- Quick Facts -->
+            <div class="quick-facts">
+                <div class="fact-card">
+                    <div class="fact-number">
+                        {% if artifact.year_taken == 'Never Taken' %}
+                            N/A
+                        {% else %}
+                            {{ artifact.year_taken }}
+                        {% endif %}
+                    </div>
+                    <div class="fact-label">
+                        {% if artifact.status == 'In Egypt' %}
+                            Never Taken
+                        {% else %}
+                            Year Taken
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-number">{{ artifact.artifact_type }}</div>
+                    <div class="fact-label">Artifact Type</div>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-number">
+                        {% if artifact.status == 'Contested' %}
+                        <span class="status-contested">{{ artifact.status }}</span>
+                        {% elif artifact.status == 'Returned' %}
+                        <span class="status-returned">{{ artifact.status }}</span>
+                        {% elif artifact.status == 'In Egypt' %}
+                        <span class="status-in-egypt">{{ artifact.status }}</span>
+                        {% else %}
+                        <span>{{ artifact.status }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="fact-label">Current Status</div>
+                </div>
+                <div class="fact-card">
+                    <div class="fact-number">{{ artifact.country }}</div>
+                    <div class="fact-label">Current Country</div>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <!-- Left Column -->
+                <div>
+                    <!-- Image Gallery -->
+                    <div class="image-gallery">
+                        <h3>🖼️ Images</h3>
+                        {% if artifact.images and artifact.images|length > 0 %}
+                            <img id="mainImage" src="{{ artifact.images[0] }}" alt="{{ artifact.name }}" class="main-image">
+                            
+                            {% if artifact.images|length > 1 %}
+                            <div class="thumbnail-grid">
+                                {% for image in artifact.images %}
+                                <img src="{{ image }}" 
+                                     alt="{{ artifact.name }} - Image {{ loop.index }}"
+                                     class="thumbnail {% if loop.first %}active{% endif %}"
+                                     onclick="changeImage('{{ image }}', this)">
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="image-placeholder">
+                                <div class="icon">🏺</div>
+                                <div>{{ artifact.name }}</div>
+                                <small>Image not available</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div class="detail-section">
+                        <h3>📋 Basic Information</h3>
+                        <div class="info-item">
+                            <span class="info-label">Artifact Name:</span>
+                            <span class="info-value">{{ artifact.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Type:</span>
+                            <span class="info-value">{{ artifact.artifact_type }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Current Status:</span>
+                            <span class="info-value">
+                                {% if artifact.status == 'Contested' %}
+                                <span class="status-contested">{{ artifact.status }}</span>
+                                {% elif artifact.status == 'Returned' %}
+                                <span class="status-returned">{{ artifact.status }}</span>
+                                {% elif artifact.status == 'In Egypt' %}
+                                <span class="status-in-egypt">{{ artifact.status }}</span>
+                                {% else %}
+                                <span>{{ artifact.status }}</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">
+                                {% if artifact.status == 'In Egypt' %}
+                                    Never Taken
+                                {% else %}
+                                    Year Taken
+                                {% endif %}
+                            </span>
+                            <span class="info-value">
+                                {% if artifact.year_taken == 'Never Taken' %}
+                                    Never removed from Egypt
+                                {% else %}
+                                    {{ artifact.year_taken }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Current Location -->
+                    <div class="detail-section">
+                        <h3>📍 Current Location</h3>
+                        <div class="info-item">
+                            <span class="info-label">Museum:</span>
+                            <span class="info-value">{{ artifact.museum }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">City:</span>
+                            <span class="info-value">{{ artifact.city }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Country:</span>
+                            <span class="info-value">{{ artifact.country }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Coordinates:</span>
+                            <span class="info-value">
+                                <span class="coordinates">{{ artifact.latitude }}, {{ artifact.longitude }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- Description -->
+                    <div class="detail-section">
+                        <h3>📖 Description & History</h3>
+                        <div class="description-box">
+                            {{ artifact.description }}
+                        </div>
+                    </div>
+
+                    <!-- Historical Timeline -->
+                    <div class="detail-section">
+                        <h3>⏳ Historical Timeline</h3>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-year">Ancient Egypt</div>
+                                <div>Created during ancient Egyptian civilization</div>
+                            </div>
+                            
+                            {% if artifact.status == 'In Egypt' %}
+                            <div class="timeline-item">
+                                <div class="timeline-year">Present</div>
+                                <div>Remains in its original location in Egypt at {{ artifact.current_location }}</div>
+                            </div>
+                            {% elif artifact.status == 'Returned' %}
+                            <div class="timeline-item">
+                                <div class="timeline-year">{{ artifact.year_taken }}</div>
+                                <div>Removed from Egypt and transported to {{ artifact.country }}</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-year">Recent</div>
+                                <div>Successfully returned to Egypt and currently in {{ artifact.current_location }}</div>
+                            </div>
+                            {% else %}
+                            <div class="timeline-item">
+                                <div class="timeline-year">{{ artifact.year_taken }}</div>
+                                <div>Removed from Egypt and transported to {{ artifact.country }}</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-year">Present</div>
+                                <div>Currently located at {{ artifact.museum }} in {{ artifact.city }}, {{ artifact.country }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Additional Details -->
+                    <div class="detail-section">
+                        <h3>🔍 Additional Information</h3>
+                        <div class="info-item">
+                            <span class="info-label">Current Location:</span>
+                            <span class="info-value">{{ artifact.current_location }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Artifact ID:</span>
+                            <span class="info-value">#{{ artifact.id }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Cultural Significance:</span>
+                            <span class="info-value">Important piece of Egyptian cultural heritage with historical and archaeological value</span>
+                        </div>
+                    </div>
+
+                    <!-- Restitution Status -->
+                    <div class="detail-section">
+                        <h3>⚖️ Restitution Status</h3>
+                        <div class="info-item">
+                            <span class="info-label">Current Status:</span>
+                            <span class="info-value">
+                                {% if artifact.status == 'Contested' %}
+                                <span class="status-contested">{{ artifact.status }}</span>
+                                {% elif artifact.status == 'Returned' %}
+                                <span class="status-returned">{{ artifact.status }}</span>
+                                {% elif artifact.status == 'In Egypt' %}
+                                <span class="status-in-egypt">{{ artifact.status }}</span>
+                                {% else %}
+                                <span>{{ artifact.status }}</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Egypt's Position:</span>
+                            <span class="info-value">
+                                {% if artifact.status == 'Contested' %}
+                                Actively seeking return through diplomatic channels
+                                {% elif artifact.status == 'Returned' %}
+                                Successfully returned and preserved in Egypt
+                                {% elif artifact.status == 'In Egypt' %}
+                                Safely preserved in its original location in Egypt
+                                {% else %}
+                                Status under review
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="{{ url_for('map_page') }}" class="nav-links" style="background: #8B4513;">🗺️ View on Main Map</a>
+                <a href="{{ url_for('artifacts_list') }}" class="nav-links" style="background: #6c757d;">📋 Back to Artifacts List</a>
+                {% if artifact.status == 'Contested' %}
+                <a href="{{ url_for('statistics') }}" class="nav-links" style="background: #d9534f;">⚖️ View Contested Artifacts</a>
+                {% elif artifact.status == 'Returned' %}
+                <a href="{{ url_for('statistics') }}" class="nav-links" style="background: #5cb85c;">✅ View Returned Artifacts</a>
+                {% else %}
+                <a href="{{ url_for('statistics') }}" class="nav-links" style="background: #0275d8;">🏠 View Artifacts in Egypt</a>
+                {% endif %}
+</div>
+        </div>
+
+        <div class="footer">
+            <p>Egyptian Artifacts Tracker &copy; 2024 | Cultural Heritage Documentation</p>
+        </div>
+    </div>
+
+    <script>
+        function changeImage(imageSrc, element) {
+            // Update main image
+            document.getElementById('mainImage').src = imageSrc;
+            
+            // Update active thumbnail
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumb => thumb.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Keyboard navigation for images
+        document.addEventListener('keydown', function(event) {
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            if (thumbnails.length <= 1) return;
+
+            const activeThumb = document.querySelector('.thumbnail.active');
+            let currentIndex = Array.from(thumbnails).indexOf(activeThumb);
+
+            if (event.key === 'ArrowRight') {
+                currentIndex = (currentIndex + 1) % thumbnails.length;
+            } else if (event.key === 'ArrowLeft') {
+                currentIndex = (currentIndex - 1 + thumbnails.length) % thumbnails.length;
+            }
+
+            const nextThumb = thumbnails[currentIndex];
+            changeImage(nextThumb.src, nextThumb);
+        });
+
+        // Preload images for better user experience
+        window.addEventListener('load', function() {
+            {% if artifact.images %}
+            {% for image in artifact.images %}
+            new Image().src = "{{ image }}";
+            {% endfor %}
+            {% endif %}
+        });
+    </script>
+</body>
+</html>

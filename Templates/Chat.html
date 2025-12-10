@@ -1,0 +1,510 @@
+<!-- Templates/chat.html - FINAL FIXED VERSION -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Egyptian Artifacts — AI Chat</title>
+  <style>
+    /* Keep all your existing styles */
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#0f172a; color:#e6eef8; margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+    .app { width:980px; max-width:95%; background: linear-gradient(180deg,#071029 0%, #081826 100%); border-radius:14px; box-shadow: 0 12px 40px rgba(2,6,23,0.6); overflow:hidden; display:grid; grid-template-columns:360px 1fr; gap:0; }
+    .left { padding:20px; border-right:1px solid rgba(255,255,255,0.04); }
+    .logo { font-weight:700; font-size:18px; color:#fff; margin-bottom:8px; }
+    .desc { font-size:13px; color:#9fb3d6; margin-bottom:12px; }
+    .suggestions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .chip { background:linear-gradient(90deg,#12233f,#0b2433); padding:8px 12px; border-radius:999px; cursor:pointer; font-size:13px; color:#bfe0ff; border:1px solid rgba(255,255,255,0.03); transition: all 0.2s ease; }
+    .chip:hover { background:linear-gradient(90deg,#1a2f4f,#0d2a3d); transform: translateY(-2px); }
+    .chat { display:flex; flex-direction:column; height:640px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+    .messages { flex:1; padding:18px; overflow:auto; display:flex; flex-direction:column; gap:12px; }
+    .input-area { padding:14px; display:flex; gap:10px; align-items:center; border-top:1px solid rgba(255,255,255,0.02); }
+    .bubble { max-width:75%; padding:12px 14px; border-radius:12px; display:inline-block; animation: pop .16s ease; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; }
+    .user { align-self:flex-end; background:linear-gradient(90deg,#0369a1,#0ea5a8); color:white; border-bottom-right-radius:4px; }
+    .bot { align-self:flex-start; background:linear-gradient(90deg,#0b1220,#102233); color:#dbeefe; border-bottom-left-radius:4px; border:1px solid rgba(255,255,255,0.03); }
+    .typing { display:flex; gap:4px; align-items:center; opacity:.9; }
+    .dot { width:7px; height:7px; background:#9fb3d6; border-radius:50%; animation: bounce 1s infinite ease-in-out; }
+    .dot:nth-child(2){ animation-delay:.15s }
+    .dot:nth-child(3){ animation-delay:.3s }
+    @keyframes bounce { 0% { transform: translateY(0); opacity:.5 } 50% { transform: translateY(-6px); opacity:1 } 100% { transform: translateY(0); opacity:.5 } }
+    @keyframes pop { from { transform: scale(.98); opacity:0 } to { transform: scale(1); opacity:1 } }
+    .upload { border:2px dashed rgba(255,255,255,0.04); padding:10px; border-radius:10px; display:flex; align-items:center; gap:10px; }
+    .upload input { display:none; }
+    .preview { max-width:160px; max-height:120px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,255,255,0.03); }
+    .status-box { margin-top:20px; padding:12px; background: rgba(255,255,255,0.05); border-radius:8px; font-size:12px; border:1px solid rgba(255,255,255,0.03); }
+    .status-title { margin-bottom:8px; font-weight:600; color:#fff; }
+    .status-item { margin:4px 0; display:flex; align-items:center; gap:6px; }
+    .status-icon { width:8px; height:8px; border-radius:50%; }
+    .status-good { background-color: #10b981; }
+    .status-warning { background-color: #f59e0b; }
+    .status-error { background-color: #ef4444; }
+    @media (max-width:900px){ .app { grid-template-columns:1fr; } .left{display:none;} .chat{height:80vh} }
+    
+    /* Debug console */
+    .debug-console { position: fixed; bottom: 10px; right: 10px; width: 300px; max-height: 200px; background: rgba(0,0,0,0.9); border: 1px solid #444; border-radius: 8px; padding: 10px; font-size: 11px; font-family: monospace; overflow-y: auto; display: none; z-index: 1000; }
+    .debug-toggle { position: fixed; bottom: 10px; right: 320px; background: #0369a1; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="left">
+      <div class="logo">Egyptian Artifacts AI</div>
+      <div class="desc">Ask about artifacts, explore museums, or upload a photo to identify an object. Powered by local Ollama (llama3.2) + your dataset.</div>
+
+      <div><strong>Quick questions</strong></div>
+      <div class="suggestions">
+        <div class="chip" data-q="How many artifacts are in the dataset?">How many artifacts?</div>
+        <div class="chip" data-q="Where are most artifacts located?">Where are most artifacts?</div>
+        <div class="chip" data-q="Tell me about the Rosetta Stone">Rosetta Stone</div>
+        <div class="chip" data-q="Who was Ramesses II?">Who was Ramesses II?</div>
+      </div>
+
+      <hr style="margin:12px 0; border-color: rgba(255,255,255,0.03)" />
+      <div><strong>Vision mode</strong></div>
+      <div style="margin-top:8px;" class="upload" id="upload-area">
+        <label style="cursor:pointer">
+          <input type="file" id="image-input" accept="image/*">
+          <div class="chip">📁 Upload image</div>
+        </label>
+        <div id="preview-holder"></div>
+      </div>
+      <div style="margin-top:10px; font-size:12px; color:#9fb3d6">Tip: drag & drop or click to upload. Ask "Which artifact is this?" after upload.</div>
+
+      <!-- AI Status Box -->
+      <div class="status-box">
+        <div class="status-title">AI Status</div>
+        <div id="ai-status">
+          <div class="status-item">
+            <div class="status-icon status-good"></div>
+            <span>Checking status...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat">
+      <div class="messages" id="messages"></div>
+
+      <div class="input-area">
+        <input id="chat-input" placeholder="Ask me about artifacts or type help..." style="flex:1; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:inherit;">
+        <button id="send-btn" class="chip">Send</button>
+        <button id="image-send" class="chip" style="display:none;">📤 Send image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Console -->
+  <button class="debug-toggle" onclick="toggleDebug()">Debug Console</button>
+  <div class="debug-console" id="debug-console">
+    <div style="color: #10b981; margin-bottom: 5px;">Debug Console</div>
+    <div id="debug-log"></div>
+  </div>
+
+<script>
+  // Debug logging
+  function debugLog(message, type = 'info') {
+    const consoleEl = document.getElementById('debug-log');
+    const colors = {
+      'info': '#9fb3d6',
+      'success': '#10b981',
+      'error': '#ef4444',
+      'warning': '#f59e0b'
+    };
+    
+    const logEntry = document.createElement('div');
+    logEntry.style.color = colors[type] || colors.info;
+    logEntry.style.marginBottom = '3px';
+    logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    
+    consoleEl.appendChild(logEntry);
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+    
+    // Keep only last 20 entries
+    const entries = consoleEl.children;
+    if (entries.length > 20) {
+      consoleEl.removeChild(entries[0]);
+    }
+  }
+
+  function toggleDebug() {
+    const consoleEl = document.getElementById('debug-console');
+    consoleEl.style.display = consoleEl.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // Main chat functionality
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+  const imageSendBtn = document.getElementById('image-send');
+  const imageInput = document.getElementById('image-input');
+  const previewHolder = document.getElementById('preview-holder');
+  const aiStatusEl = document.getElementById('ai-status');
+
+  // Load history
+  let history = JSON.parse(localStorage.getItem('chat_history_v1') || '[]');
+  
+  function renderHistory(){
+    messagesEl.innerHTML = '';
+    for(const m of history) {
+      appendBubble(m.sender, m.text, m.img);
+    }
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function appendBubble(sender, text, imgUrl=null){
+    const el = document.createElement('div');
+    el.className = 'bubble ' + (sender === 'user' ? 'user' : 'bot');
+    
+    if(imgUrl){
+      el.innerHTML = `
+        <div style="font-size:12px; color: #cde7ff; margin-bottom:6px;">
+          <strong>${sender==='user' ? 'You' : 'AI Assistant'}</strong>
+        </div>
+        <img src="${imgUrl}" style="max-width:240px; max-height:180px; border-radius:8px; display:block; margin-bottom:8px; object-fit:cover;"/>
+        <div style="white-space:pre-wrap;">${escapeHtml(text)}</div>
+      `;
+    } else {
+      el.innerHTML = `<div style="white-space:pre-wrap;">${escapeHtml(text)}</div>`;
+    }
+    messagesEl.appendChild(el);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function escapeHtml(s){ 
+    return String(s).replace(/[&<>"']/g, (c)=>({ 
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[c])); 
+  }
+
+  // Typing indicator
+  function showTyping(){
+    const t = document.createElement('div');
+    t.className = 'typing';
+    t.id='typing';
+    t.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+    messagesEl.appendChild(t);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    debugLog('Showing typing indicator', 'info');
+  }
+  
+  function hideTyping(){ 
+    const t = document.getElementById('typing'); 
+    if(t) t.remove();
+    debugLog('Hiding typing indicator', 'info');
+  }
+
+  // Send text message
+  async function sendText(q){
+    if(!q || q.trim() === '') return;
+    
+    const question = q.trim();
+    debugLog(`Sending text: "${question}"`, 'info');
+    
+    // Add to UI & history
+    history.push({sender:'user', text:question});
+    localStorage.setItem('chat_history_v1', JSON.stringify(history));
+    appendBubble('user', question);
+    inputEl.value = '';
+    showTyping();
+
+    try {
+      debugLog('Calling /api/ai-assistant...', 'info');
+      const res = await fetch('/api/ai-assistant', {
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({message:question})
+      });
+      
+      debugLog(`Response status: ${res.status}`, 'success');
+      const data = await res.json();
+      debugLog(`Response data: ${JSON.stringify(data).substring(0, 200)}...`, 'info');
+      
+      hideTyping();
+      
+      const reply = data.response || 'No response';
+      history.push({sender:'bot', text:reply});
+      localStorage.setItem('chat_history_v1', JSON.stringify(history));
+      appendBubble('bot', reply);
+      
+    } catch(e){
+      hideTyping();
+      debugLog(`Text send error: ${e.message}`, 'error');
+      const errorMsg = 'Error contacting backend. Please try again.';
+      history.push({sender:'bot', text:errorMsg});
+      localStorage.setItem('chat_history_v1', JSON.stringify(history));
+      appendBubble('bot', errorMsg);
+    }
+  }
+
+  // Event listeners for text sending
+  sendBtn.addEventListener('click', ()=> sendText(inputEl.value.trim()));
+  inputEl.addEventListener('keydown', (e)=> { 
+    if(e.key === 'Enter') sendText(inputEl.value.trim()); 
+  });
+
+  // Suggestion chips
+  document.querySelectorAll('.chip[data-q]').forEach(ch => {
+    ch.addEventListener('click', ()=> {
+      const q = ch.getAttribute('data-q');
+      inputEl.value = q;
+      sendText(q);
+    });
+  });
+
+  // Image upload + preview
+  imageInput.addEventListener('change', ()=> {
+    if(!imageInput.files || !imageInput.files[0]) return;
+    
+    const file = imageInput.files[0];
+    debugLog(`Image selected: ${file.name} (${file.size} bytes)`, 'info');
+    
+    const url = URL.createObjectURL(file);
+    
+    // Clear previous preview
+    previewHolder.innerHTML = '';
+    
+    // Create preview image
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'preview';
+    img.onload = () => URL.revokeObjectURL(url);
+    
+    previewHolder.appendChild(img);
+    
+    // Show the image send button
+    imageSendBtn.style.display = 'inline-block';
+    inputEl.placeholder = "Add a question about the image (optional)...";
+    
+    debugLog('Image preview created, send button shown', 'success');
+  });
+
+  // Send image to /api/ai-vision - FIXED VERSION
+  imageSendBtn.addEventListener('click', async ()=>{
+    if(!imageInput.files || !imageInput.files[0]){ 
+      alert('Please choose an image first.'); 
+      return; 
+    }
+    
+    const file = imageInput.files[0];
+    const question = inputEl.value.trim();
+    
+    debugLog(`Starting image upload: ${file.name}, Question: "${question}"`, 'info');
+    
+    // Show user bubble with image
+    const localUrl = URL.createObjectURL(file);
+    const userMessage = question || 'Identifying this image...';
+    
+    history.push({
+      sender: 'user', 
+      text: userMessage, 
+      img: localUrl
+    });
+    localStorage.setItem('chat_history_v1', JSON.stringify(history));
+    appendBubble('user', userMessage, localUrl);
+    
+    // Clear inputs
+    inputEl.value = '';
+    previewHolder.innerHTML = '';
+    imageInput.value = '';
+    imageSendBtn.style.display = 'none';
+    inputEl.placeholder = "Ask me about artifacts or type help...";
+    
+    showTyping();
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('question', question || 'What is this Egyptian artifact?');
+      
+      debugLog('Sending FormData to /api/ai-vision...', 'info');
+      
+      const res = await fetch('/api/ai-vision', { 
+        method: 'POST', 
+        body: formData 
+      });
+      
+      debugLog(`Vision response status: ${res.status}`, res.status === 200 ? 'success' : 'error');
+      
+      const data = await res.json();
+      debugLog(`Vision response data: ${JSON.stringify(data).substring(0, 300)}...`, 'info');
+      
+      hideTyping();
+      
+      // Check if response is ok
+      if(data.ok === true || data.ok === 'true' || res.status === 200) {
+        const reply = data.response || 'No response from vision model.';
+        debugLog(`Vision response: ${reply.substring(0, 100)}...`, 'success');
+        
+        history.push({sender: 'bot', text: reply});
+        localStorage.setItem('chat_history_v1', JSON.stringify(history));
+        appendBubble('bot', reply);
+      } else {
+        // Handle error response
+        const errorMsg = data.response || 'Error analyzing image';
+        debugLog(`Vision error: ${errorMsg}`, 'error');
+        
+        history.push({sender: 'bot', text: errorMsg});
+        localStorage.setItem('chat_history_v1', JSON.stringify(history));
+        appendBubble('bot', errorMsg);
+      }
+      
+    } catch(e){
+      hideTyping();
+      debugLog(`Vision send error: ${e.message}`, 'error');
+      console.error('Vision error details:', e);
+      
+      const errorMsg = 'Error contacting vision backend. Please try again.';
+      history.push({sender: 'bot', text: errorMsg});
+      localStorage.setItem('chat_history_v1', JSON.stringify(history));
+      appendBubble('bot', errorMsg);
+    }
+  });
+
+  // Drag and drop functionality
+  const uploadArea = document.getElementById('upload-area');
+  
+  uploadArea.addEventListener('dragover', (e)=> { 
+    e.preventDefault(); 
+    uploadArea.style.borderColor = '#5eead4';
+    uploadArea.style.background = 'rgba(94, 234, 212, 0.1)';
+  });
+  
+  uploadArea.addEventListener('dragleave', ()=> { 
+    uploadArea.style.borderColor = 'rgba(255,255,255,0.04)';
+    uploadArea.style.background = 'transparent';
+  });
+  
+  uploadArea.addEventListener('drop', (e)=> {
+    e.preventDefault();
+    uploadArea.style.borderColor = 'rgba(255,255,255,0.04)';
+    uploadArea.style.background = 'transparent';
+    
+    const files = e.dataTransfer.files;
+    if(files && files[0]) {
+      debugLog(`File dropped: ${files[0].name}`, 'info');
+      
+      // Create a new DataTransfer object to set files
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(files[0]);
+      imageInput.files = dataTransfer.files;
+      
+      // Trigger change event
+      imageInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  // AI Status Check
+  async function checkAIStatus() {
+    try {
+      debugLog('Checking Ollama status...', 'info');
+      const res = await fetch('/api/ollama-status');
+      const data = await res.json();
+      
+      let statusHTML = '';
+      
+      if (data.running) {
+        debugLog('Ollama is running', 'success');
+        statusHTML += `
+          <div class="status-item">
+            <div class="status-icon status-good"></div>
+            <span>Ollama: Running</span>
+          </div>
+        `;
+        
+        if (data.text_model) {
+          statusHTML += `
+            <div class="status-item">
+              <div class="status-icon status-good"></div>
+              <span>Text: ${data.text_model}</span>
+            </div>
+          `;
+        }
+        
+        if (data.vision_model) {
+          statusHTML += `
+            <div class="status-item">
+              <div class="status-icon status-good"></div>
+              <span>Vision: ${data.vision_model}</span>
+            </div>
+          `;
+          debugLog(`Vision model available: ${data.vision_model}`, 'success');
+        } else {
+          statusHTML += `
+            <div class="status-item">
+              <div class="status-icon status-warning"></div>
+              <span>No vision model</span>
+            </div>
+          `;
+          debugLog('No vision model available', 'warning');
+        }
+        
+      } else {
+        debugLog('Ollama is not running', 'error');
+        statusHTML += `
+          <div class="status-item">
+            <div class="status-icon status-error"></div>
+            <span>Ollama: Not Running</span>
+          </div>
+          <div style="font-size:11px; color:#9fb3d6; margin-top:6px; padding-left:14px;">
+            Start with: <code>ollama serve</code>
+          </div>
+        `;
+      }
+      
+      aiStatusEl.innerHTML = statusHTML;
+      
+    } catch (e) {
+      debugLog(`Status check error: ${e.message}`, 'error');
+      aiStatusEl.innerHTML = `
+        <div class="status-item">
+          <div class="status-icon status-error"></div>
+          <span>Status check failed</span>
+        </div>
+      `;
+    }
+  }
+
+  // Initialize
+  function init() {
+    debugLog('Initializing chat...', 'info');
+    
+    // Render chat history
+    renderHistory();
+    
+    // Check AI status
+    checkAIStatus();
+    
+    // Set up periodic status check (every 30 seconds)
+    setInterval(checkAIStatus, 30000);
+    
+    // Welcome message if no history
+    if (history.length === 0) {
+      setTimeout(() => {
+        const welcomeMsg = "Hello! I'm your Egyptian Artifacts AI assistant. I can help you:\n\n1. 📝 Answer questions about artifacts\n2. 🎨 Analyze images of artifacts\n3. 📊 Provide statistics\n4. 🌍 Show artifact locations\n\nTry uploading an image or asking a question!";
+        history.push({sender: 'bot', text: welcomeMsg});
+        localStorage.setItem('chat_history_v1', JSON.stringify(history));
+        appendBubble('bot', welcomeMsg);
+        debugLog('Welcome message displayed', 'success');
+      }, 500);
+    }
+    
+    debugLog('Chat initialized successfully', 'success');
+  }
+
+  // Start everything when page loads
+  document.addEventListener('DOMContentLoaded', init);
+
+  // Enable debug console by default for troubleshooting
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.getElementById('debug-console').style.display = 'block';
+      debugLog('Debug console enabled', 'info');
+    }, 1000);
+  });
+
+</script>
+</body>
+</html>
