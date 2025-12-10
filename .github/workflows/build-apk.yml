@@ -9,7 +9,7 @@ jobs:
       with:
         buildozer_version: stable
         buildozer_command: android debug
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: apk
         path: bin/*.apk
