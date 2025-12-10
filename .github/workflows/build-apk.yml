@@ -1,0 +1,15 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ArtemSBulgakov/buildozer-action@v1
+      with:
+        buildozer_version: stable
+        buildozer_command: android debug
+    - uses: actions/upload-artifact@v3
+      with:
+        name: apk
+        path: bin/*.apk
